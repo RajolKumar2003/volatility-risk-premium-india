@@ -1,0 +1,5 @@
+- Average VIX: 16.59
+- Average realised vol: 14.12
+- Average premium: 2.46 vol points
+- Premium positive on: 79.7% of days
+- Worst premium: -64.50
