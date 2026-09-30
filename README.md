@@ -1,35 +1,39 @@
 # Volatility Risk Premium: India VIX vs Realised Nifty Volatility
 
-I wanted to check if the market's expected volatility (India VIX) is usually higher than the volatility that actually happens afterwards.
+An empirical study of whether the market's expected volatility (India VIX) is usually higher than the volatility that Nifty 50 actually realises afterwards.
 
-## Why I made this
-Options traders earn money from the gap between implied and realised volatility, so I wanted to check this gap on real Indian market data instead of just reading about it. I also wanted a project that uses simple statistics and real data rather than a complicated model.
+## Motivation
+Option prices depend on expected volatility, so I wanted to check on real Indian market data whether the market's expectation is usually higher than what actually happens.
 
-## What I did
-- Took daily log returns of Nifty 50: `r = ln(P_t / P_(t-1))`
-- Calculated realised volatility over the next 21 trading days: `std(returns) * sqrt(252) * 100`
-- Premium = VIX - realised volatility. If it is positive, people who sold options were paid more than the risk they faced.
-- Plotted both series and the premium, and looked at the worst periods
+## Method
+- **Data:** daily Nifty 50 closes and India VIX levels, downloaded with `yfinance`
+- **Returns:** daily log returns, `r_t = ln(P_t / P_(t-1))`
+- **Realised volatility:** standard deviation of daily returns over the next 21 trading days, annualised with `sqrt(252)` and expressed in percent
+- **Premium:** `VIX - realised volatility`. A positive value means implied volatility was higher than what materialised.
+
+## Results
+Sample: 2,852 trading days.
+
+- Average VIX: 16.59
+- Average realised volatility: 14.12
+- Average premium: 2.46 volatility points
+- Median premium: 3.25
+- Premium positive on 79.7% of days
+- 5th percentile premium: -6.34
+- Worst premium: -64.50 (on 2020-03-05, at the start of the COVID crash)
+
+![Results](vrp_results.png)
+
+Implied volatility was above realised volatility on most days, which is consistent with the well-known volatility risk premium. The median is higher than the mean, so the premium is skewed: small gains on most days and rare, very large losses in crashes.
 
 ## How to run
 ```
 pip install numpy pandas matplotlib yfinance
 python vrp_study.py
 ```
-If yfinance does not work, download Nifty and India VIX data as `nifty.csv` and `vix.csv` (columns `Date, Close`) and keep them in the same folder.
-
-## Results
-- Average VIX: 16.59
-- Average realised vol: 14.12
-- Average premium: 2.46 vol points
-- Premium positive on: 79.7% of days
-- Worst premium: -64.50 (on 2020-03-05, start of the COVID crash) 
-
-[results](vrp_results.png)
-
-The average premium looks attractive, but one crash period wiped out a large part of it, so selling volatility is risky.
+The script prints the statistics above and saves `vrp_results.png`. If `yfinance` does not work, place `nifty.csv` and `vix.csv` (columns `Date, Close`) in the same folder.
 
 ## Limitations
 - VIX is a 30 calendar day estimate, and I used 21 trading days as an approximation
-- I did not include trading costs
-- The average looks good, but option sellers can lose a lot in rare crash periods, so the worst values matter more than the average
+- This measures the gap only. It is not a trading strategy, and it ignores costs, margin and position sizing.
+- A high average premium does not remove crash risk, as the worst period shows
